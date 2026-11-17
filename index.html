@@ -23,7 +23,6 @@
   --H:400px;
 }
 *{box-sizing:border-box}
-html{scroll-snap-type:y proximity}
 html,body{background:var(--bg)}
 body{margin:0;color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:clip;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -50,7 +49,6 @@ p{margin:0}
 
 /* trilho: a altura extra é o "curso" da rolagem; o palco fica preso na tela */
 .rail{position:relative;margin-top:22px}
-.snap{position:absolute;left:0;width:1px;height:1px;scroll-snap-align:start;pointer-events:none}
 .stage{position:sticky;top:0;height:100vh;height:100svh;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto auto;
   padding-block:calc(12px + env(safe-area-inset-top,0px)) calc(14px + env(safe-area-inset-bottom,0px))}
 .stage>.c{width:100%;max-width:460px;justify-self:center;min-width:0}
@@ -68,22 +66,23 @@ p{margin:0}
 
 /* janela do tambor */
 .win{position:relative;overflow:hidden;margin-block:8px;
-  -webkit-mask-image:linear-gradient(transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(transparent,#000 9%,#000 91%,transparent)}
+}
+.win::after{content:"";position:absolute;inset:0;z-index:200;pointer-events:none;background:linear-gradient(var(--bg),transparent 9%,transparent 91%,var(--bg))}
 .win::before{content:"";position:absolute;left:-10%;right:-10%;top:50%;height:70%;transform:translateY(-50%);background:radial-gradient(50% 50% at 50% 50%,rgba(199,255,40,.13),transparent 70%);pointer-events:none}
 .card{position:absolute;left:0;right:0;top:50%;height:var(--H);margin-top:calc(var(--H) / -2);border-radius:18px;overflow:hidden;background:var(--panel);
-  box-shadow:0 24px 44px -20px rgba(0,0,0,.95);will-change:transform;backface-visibility:hidden;--show:0;--dim:.5;
-  border:1.5px solid rgba(199,255,40,calc(var(--show) * .55))}
+  box-shadow:0 24px 44px -20px rgba(0,0,0,.95);will-change:transform;backface-visibility:hidden;contain:layout paint}
+.card .ring{position:absolute;inset:0;border-radius:inherit;border:1.5px solid rgba(199,255,40,.55);opacity:0;pointer-events:none;z-index:3}
 .card .ph{position:absolute;inset:0;background:#1d201c}
 .card .ph img{width:100%;height:100%;object-fit:cover;display:block}
 .card .ph.cut{background:radial-gradient(80% 80% at 78% 72%,rgba(199,255,40,.5),rgba(199,255,40,.07) 55%,#1b1e19 80%)}
 .card .ph.cut img{position:absolute;right:-6%;bottom:0;height:92%;width:auto;object-fit:contain;filter:grayscale(1)}
 .card .shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(11,12,11,.97) 0%,rgba(11,12,11,.8) 36%,rgba(11,12,11,0) 68%),linear-gradient(90deg,rgba(11,12,11,.6),rgba(11,12,11,0) 60%)}
-.card .dim{position:absolute;inset:0;background:var(--bg);opacity:var(--dim);pointer-events:none}
+.card .dim{position:absolute;inset:0;background:var(--bg);opacity:.5;pointer-events:none;z-index:2}
 .card .num{position:absolute;top:16px;left:20px;font-family:var(--f-display);font-weight:500;font-stretch:75%;font-size:4rem;line-height:.8;opacity:.92}
 .card .tag{position:absolute;top:18px;right:16px;font-family:var(--f-mono);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;background:var(--lime);color:var(--lime-ink);padding:5px 8px;border-radius:6px}
 .card .body{position:absolute;left:0;right:0;bottom:0;padding:20px;display:flex;flex-direction:column;gap:10px}
 .card h2{margin:0;font-family:var(--f-display);font-weight:900;font-stretch:118%;text-transform:uppercase;font-size:2rem;line-height:.95;letter-spacing:-.015em;text-wrap:balance;max-width:13ch}
-.card .more{display:flex;flex-direction:column;gap:12px;opacity:var(--show);transform:translateY(calc((1 - var(--show)) * 10px))}
+.card .more{display:flex;flex-direction:column;gap:12px;opacity:0}
 .card .more p{color:#C9CEC3;font-size:.93rem;max-width:34ch}
 .cta{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--lime);color:var(--lime-ink);border-radius:12px;padding:14px 18px;font-family:var(--f-display);font-weight:800;font-stretch:110%;text-transform:uppercase;font-size:.9rem;letter-spacing:.02em}
 .cta svg{width:18px;height:18px;flex:none;transition:transform .2s ease}
@@ -91,10 +90,11 @@ p{margin:0}
 /* chamada para o clique: só no card ativo */
 .cta{position:relative;overflow:hidden;isolation:isolate}
 .cta::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.65) 50%,transparent 65%);transform:translateX(-130%)}
+.cta{will-change:transform;box-shadow:0 10px 30px -12px rgba(199,255,40,.6)}
 .card.on .cta{animation:ctaPulse 2.6s ease-in-out infinite}
 .card.on .cta::before{animation:ctaShine 2.6s ease-in-out infinite}
 .card.on .cta svg{animation:ctaArrow 2.6s ease-in-out infinite}
-@keyframes ctaPulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(199,255,40,0),0 8px 24px -12px rgba(199,255,40,.5)}50%{transform:scale(1.025);box-shadow:0 0 0 7px rgba(199,255,40,.12),0 14px 34px -10px rgba(199,255,40,.75)}}
+@keyframes ctaPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
 @keyframes ctaShine{0%,35%{transform:translateX(-130%)}75%,100%{transform:translateX(130%)}}
 @keyframes ctaArrow{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
 @media (prefers-reduced-motion:reduce){.card.on .cta,.card.on .cta::before,.card.on .cta svg{animation:none}}
@@ -156,7 +156,7 @@ p{margin:0}
 .dots button[aria-current="true"]::after{width:26px;background:var(--lime)}
 
 /* rodapé */
-.foot{max-width:460px;margin:8px auto 0;padding-bottom:calc(40px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;align-items:flex-end;gap:16px;scroll-snap-align:end}
+.foot{max-width:460px;margin:8px auto 0;padding-bottom:calc(40px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;align-items:flex-end;gap:16px}
 .soc{display:flex;gap:10px}
 .soc a{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center;transition:border-color .2s}
 .soc a:hover{border-color:var(--lime)}
@@ -178,7 +178,7 @@ p{margin:0}
   .side.r .sp{font-size:.78rem}
 }
 @keyframes swap{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){html{scroll-snap-type:none}.cue .ic svg{animation:none}*{transition:none!important}}
+@media (prefers-reduced-motion:reduce){.cue .ic svg{animation:none}*{transition:none!important}}
 </style>
 </head>
 <body>
@@ -221,16 +221,16 @@ p{margin:0}
           <span class="ph hero"><span class="wm"><small>Alavancagem de</small><b>Vendas</b></span><img src="https://alavancagemdigital.github.io/lpmentoriaald/breno-limpo.webp" onerror="this.onerror=null;this.src='breno.webp';this.classList.add('fb')" alt="" fetchpriority="high" width="650" height="974"></span><span class="shade hs"></span>
           <span class="tag">Mais procurado</span>
           <span class="body"><h2>Mentoria Alavancagem de Vendas</h2><span class="more"><p>Atração, funil, agenda ativa e indicadores para o seu negócio vender todos os dias.</p><span class="cta">Conhecer a mentoria<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></span>
-          <span class="dim"></span></a>
+          <span class="dim"></span><span class="ring"></span></a>
         <a class="card" href="https://typebot.co/alavancagem-digital-hep9t82" data-t="Agência" data-s="Para clínicas e negócios de saúde e estética que querem crescer com estrutura. Estratégia, conteúdo, tráfego e a nossa CRC atendendo, agendando e convertendo os seus contatos.">
           <span class="ph hero ag"><span class="wm"><small>Resultado de cliente</small><b>Digital</b></span><span class="frame"><img src="dep-jc-o.webp" alt="" loading="lazy" width="540" height="960"></span></span><span class="shade hs"></span>
           <span class="body"><h2>Serviços da agência</h2><span class="more"><p>Uma equipe completa para alavancar o seu faturamento acima de R$ 100 mil/mês.</p><span class="cta">Agendar consultoria gratuita<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></span>
-          <span class="dim"></span></a>
+          <span class="dim"></span><span class="ring"></span></a>
         <a class="card" href="https://wa.me/5537998324790?text=Ol%C3%A1%2C%20Breno%21%20Vim%20pelo%20link%20da%20bio%20e%20quero%20levar%20uma%20palestra%20ou%20evento%20da%20Alavancagem%20para%20a%20minha%20empresa." data-t="Palestras" data-s="Para empresas, associações e eventos. Uma imersão em vendas e marketing montada para o seu público. Fale direto comigo no WhatsApp para ver datas e formato.">
           <span class="ph"><img src="palestra.webp" alt="" loading="lazy" width="760" height="823" style="object-position:48% 78%;filter:grayscale(1) contrast(1.08) brightness(.82)"></span><span class="shade hs"></span>
           <span class="num">03</span>
           <span class="body"><h2>Palestras e eventos</h2><span class="more"><p>Leve essa imersão para sua empresa ou evento e coloque seu time em uma nova frequência de resultados.</p><span class="cta">Falar no WhatsApp<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></span>
-          <span class="dim"></span></a>
+          <span class="dim"></span><span class="ring"></span></a>
         <a class="card" href="https://alavancagemdigitalmkt.com.br/maquinavendas/" data-t="CRC" data-s="O método da central de atendimento da Alavancagem: scripts, rotina e acompanhamento para a sua recepção transformar mensagens em agendamentos e vendas.">
           <span class="ph hero eb" aria-hidden="true">
             <span class="bk">
@@ -248,7 +248,7 @@ p{margin:0}
             <span class="grow"><span class="g-h"><i>Vendas</i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17l6-6 4 4 6-7"/><path d="M15 8h5v5"/></svg></span><span class="g-b"><b style="height:28%"></b><b style="height:40%"></b><b style="height:36%"></b><b style="height:58%"></b><b style="height:74%"></b><b style="height:100%"></b></span></span>
           </span><span class="shade hs"></span>
           <span class="body"><h2><span class="hl">Ebook gratuito:</span> CRC que converte</h2><span class="more"><p>Um passo a passo para sua equipe de atendimento virar uma máquina de agendamentos e vendas.</p><span class="cta">Quero o e-book grátis<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></span>
-          <span class="dim"></span></a>
+          <span class="dim"></span><span class="ring"></span></a>
       </div>
 
       <div class="side r" aria-hidden="true">
@@ -275,76 +275,96 @@ p{margin:0}
 (()=>{
   const rail=document.getElementById('rail'), win=document.getElementById('win');
   const cards=[...win.querySelectorAll('.card')], N=cards.length;
+  const parts=cards.map(c=>({c,dim:c.querySelector('.dim'),more:c.querySelector('.more'),ring:c.querySelector('.ring'),last:''}));
   const sDesc=document.getElementById('sDesc'), mDesc=document.getElementById('mDesc'), cur=document.getElementById('cur'), sNum=document.getElementById('sNum'), sTitle=document.getElementById('sTitle'), dotsEl=document.getElementById('dots');
   const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
   // curva do tambor por distância ao centro (Y em múltiplos da altura do card)
   const Y=[0,.68,1.07,1.37,1.61,1.82], A=[0,62,70,74,77,79], S=[1,.95,.91,.88,.85,.83];
   const at=(T,x)=>{const k=T.length-1; if(x>=k) return T[k]; const i=x|0; return T[i]+(T[i+1]-T[i])*(x-i);};
   const pad=n=>String(n).padStart(2,'0');
+  const clamp=v=>Math.min(N-1,Math.max(0,v));
 
   const dots=cards.map((c,i)=>{const b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Ir para '+c.dataset.t);b.addEventListener('click',()=>go(i));dotsEl.appendChild(b);return b;});
-  const snaps=cards.map(()=>{const s=document.createElement('span');s.className='snap';rail.appendChild(s);return s;});
 
-  let H=400, step=180, top0=0, p=0, intro=0, active=-1, raf=0;
-  function measure(){
-    const vh=window.innerHeight;
+  let H=400, step=260, top0=0, target=0, pos=0, intro=0, active=-1, raf=0, last=0, vw=0, vh=0, idle=0;
+  function measure(force){
+    const w=window.innerWidth, h=window.innerHeight;
+    // a barra do navegador do celular muda a altura ao rolar: só recalcula em mudança real
+    if(!force && w===vw && Math.abs(h-vh)<140) return;
+    vw=w; vh=h;
     H=Math.round(Math.min(410,Math.max(290,vh*.56)));
     document.documentElement.style.setProperty('--H',H+'px');
-    step=Math.round(Math.max(140,vh*.22));
+    step=Math.round(Math.max(220,vh*.36));   // mais rolagem por card = giro mais lento
     rail.style.height=(vh+(N-1)*step)+'px';
     top0=rail.getBoundingClientRect().top+window.scrollY;
-    snaps.forEach((s,i)=>{s.style.top=(i*step)+'px';});
   }
-  function read(){ p=Math.min(N-1,Math.max(0,(window.scrollY-top0)/step)); }
-  function render(){
-    raf=0;
-    const q=Math.min(N-1,Math.max(0,p+intro));
+  const read=()=>{ target=clamp((window.scrollY-top0)/step); };
+
+  function paint(q){
     for(let i=0;i<N;i++){
-      const c=cards[i], d=i-q, a=Math.abs(d), s=d<0?-1:1;
-      if(a>3.4){ if(c.style.visibility!=='hidden') c.style.visibility='hidden'; continue; }
-      c.style.visibility='visible';
-      c.style.transform=`translate3d(0,${(s*at(Y,a)*H).toFixed(1)}px,0) perspective(800px) rotateX(${(s*at(A,a)).toFixed(2)}deg) scale(${at(S,a).toFixed(3)})`;
-      c.style.zIndex=String(100-Math.round(a*10));
-      c.style.setProperty('--dim',Math.min(.8,a*.4).toFixed(3));
-      c.style.setProperty('--show',Math.max(0,1-a*1.8).toFixed(3));
+      const P=parts[i], d=i-q, a=Math.abs(d), s=d<0?-1:1, c=P.c;
+      if(a>2.6){ if(P.last!=='h'){c.style.visibility='hidden';P.last='h';} continue; }
+      if(P.last==='h'||!P.last) c.style.visibility='visible';
+      const t=`translate3d(0,${(s*at(Y,a)*H).toFixed(1)}px,0) perspective(800px) rotateX(${(s*at(A,a)).toFixed(1)}deg) scale(${at(S,a).toFixed(3)})`;
+      if(t===P.last) continue;
+      P.last=t; c.style.transform=t;
+      c.style.zIndex=100-Math.round(a*10);
+      const show=Math.max(0,1-a*1.8);
+      P.dim.style.opacity=Math.min(.8,a*.4).toFixed(2);
+      P.more.style.opacity=show.toFixed(2);
+      P.ring.style.opacity=show.toFixed(2);
     }
     const k=Math.round(q);
     if(k!==active){
       active=k;
-      cards.forEach((c,i)=>{c.classList.toggle('on',i===k); c.tabIndex=(i===k)?0:-1;});
+      cards.forEach((c,i)=>{c.classList.toggle('on',i===k); c.tabIndex=(i===k)?0:-1; c.querySelector('.more').style.pointerEvents=i===k?'':'none';});
       dots.forEach((b,i)=>b.setAttribute('aria-current',i===k?'true':'false'));
       cur.textContent=sNum.textContent=pad(k+1);
       sTitle.textContent=cards[k].dataset.t;
       sDesc.textContent=mDesc.textContent=cards[k].dataset.s||'';
-      [sTitle,sDesc,mDesc].forEach(el=>{el.classList.remove('swap');void el.offsetWidth;el.classList.add('swap');});
+      [sTitle,sDesc,mDesc].forEach(el=>{el.classList.remove('swap');requestAnimationFrame(()=>el.classList.add('swap'));});
     }
   }
-  const ask=()=>{ if(!raf) raf=requestAnimationFrame(render); };
+  // o tambor segue a rolagem com suavização (inércia leve), sem travar no meio
+  function loop(t){
+    const dt=last?Math.min(64,t-last):16.7; last=t;
+    const goal=clamp(target+intro);
+    const k=reduce?1:1-Math.pow(1-.12,dt/16.7);
+    pos+= (goal-pos)*k;
+    if(Math.abs(goal-pos)<.0008) pos=goal;
+    paint(pos);
+    if(pos!==goal){ raf=requestAnimationFrame(loop); } else { raf=0; last=0; }
+  }
+  const kick=()=>{ if(!raf){ last=0; raf=requestAnimationFrame(loop); } };
   function go(i){ window.scrollTo({top:top0+i*step,behavior:reduce?'auto':'smooth'}); }
 
-  // toque num card lateral gira até ele; no card do centro, abre o link
+  // ao parar de rolar, assenta suavemente no card mais próximo
+  function settle(){
+    const y=window.scrollY; if(y<top0-2||y>top0+(N-1)*step+2) return;
+    const n=Math.round(target); if(Math.abs(target-n)>.02) go(n);
+  }
+
   cards.forEach((c,i)=>c.addEventListener('click',e=>{ if(i!==active){ e.preventDefault(); go(i); } }));
   win.addEventListener('keydown',e=>{
-    if(e.key==='ArrowDown'&&active<N-1){e.preventDefault();go(active+1);setTimeout(()=>cards[active]&&cards[Math.min(N-1,active)].focus({preventScroll:true}),350);}
-    if(e.key==='ArrowUp'&&active>0){e.preventDefault();go(active-1);setTimeout(()=>cards[active].focus({preventScroll:true}),350);}
+    if(e.key==='ArrowDown'&&active<N-1){e.preventDefault();go(active+1);}
+    if(e.key==='ArrowUp'&&active>0){e.preventDefault();go(active-1);}
   });
 
-  window.addEventListener('scroll',()=>{read();ask();},{passive:true});
-  window.addEventListener('resize',()=>{measure();read();ask();});
-  measure(); read(); render();
-  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{measure();read();ask();});
+  let touching=false;
+  window.addEventListener('touchstart',()=>{touching=true;clearTimeout(idle);},{passive:true});
+  window.addEventListener('touchend',()=>{touching=false;clearTimeout(idle);idle=setTimeout(settle,260);},{passive:true});
+  window.addEventListener('scroll',()=>{ read(); kick(); clearTimeout(idle); if(!touching) idle=setTimeout(settle,260); },{passive:true});
+  window.addEventListener('resize',()=>{ measure(false); read(); kick(); });
+  measure(true); read(); pos=target; paint(pos);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{measure(true);read();kick();});
 
   // giro curto na abertura para mostrar que o tambor se mexe
   if(!reduce && window.scrollY<10){
-    let t0=0, stop=false;
-    const cancel=()=>{stop=true;intro=0;ask();};
+    let stop=false;
+    const cancel=()=>{stop=true;intro=0;kick();};
     window.addEventListener('wheel',cancel,{once:true,passive:true});
     window.addEventListener('touchstart',cancel,{once:true,passive:true});
-    setTimeout(()=>{
-      const tick=t=>{ if(stop) return; if(!t0) t0=t; const x=Math.min(1,(t-t0)/1400);
-        intro=.55*Math.sin(Math.PI*x)*(1-x*.15); ask(); if(x<1) requestAnimationFrame(tick); else {intro=0;ask();} };
-      requestAnimationFrame(tick);
-    },700);
+    setTimeout(()=>{ if(stop) return; intro=.5; kick(); setTimeout(()=>{ intro=0; kick(); },650); },800);
   }
 })();
 </script>
